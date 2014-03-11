@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+    <title>OpenFisca Visualizations</title>
+
+    <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <style>
+#chart {
+  height: 500px;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table class="table" id="openfisca-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Values</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    </div>
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/underscore/underscore.js"></script>
+    <script>
+var QueryString = function () {
+    // This function is anonymous, is executed immediately and 
+    // the return value is assigned to QueryString!
+    var query_string = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        // If first entry with this name
+        if (typeof query_string[pair[0]] === "undefined") {
+            query_string[pair[0]] = unescape(pair[1]);
+            // If second entry with this name
+        } else if (typeof query_string[pair[0]] === "string") {
+            var arr = [ query_string[pair[0]], pair[1] ];
+            query_string[pair[0]] = unescape(arr);
+            // If third or later entry with this name
+        } else {
+            query_string[pair[0]].push(unescape(pair[1]));
+        }
+    }
+    return query_string;
+} ();
+
+var simulationData;
+$.ajax({
+    type: "GET",
+    url: QueryString.simulationUrl,
+})
+.then(function(data) {
+    var xAxis;
+    var value_index = 0;
+    var create_nodes = function(node, nodes, base_value = 0) {
+        if (typeof nodes === 'undefined' || nodes === null) {
+            nodes = [];
+        }
+        if (node.code === 'sal') {
+            xAxis = node.values;
+        }
+        var children = node.children;
+        if (children) {
+            var child_base_value = base_value;
+            _.each(node.children, function (child) {
+                nodes.concat(create_nodes(child, nodes, child_base_value));
+                child_base_value += child.values[value_index]
+            });
+        }
+
+        value = node.values[value_index]
+        if ( ! children && _.filter(node.values, function(n) { return n != 0; } ).length > 0) {
+            var column = {
+                base_value: base_value,
+                code: value.code,
+                };
+            _.extend(column, node);
+            nodes.push(column);
+        }
+        return nodes
+    };
+    var nodes = create_nodes(data.output.value);
+
+    return nodes
+//    var data = [];
+//    _.each(nodes, function(node) {
+//        data.push({
+//            key: node.name,
+//            values: _.zip(xAxis, node.values || [])
+//        });
+//    });
+//    return data;
+})
+.fail(function(jqXHR, textStatus, errorThrown) {
+    console.error('Fetch API data error : ', jqXHR, textStatus, errorThrown);
+})
+.then(function(data) {
+    $columnValuesHeader = $('#openfisca-table').find('th').last();
+    $tableBody = $('#openfisca-table').find('tbody');
+    _.each(data, function(item) {
+        if ($columnValuesHeader.attr('colspan') > item.values.length) {
+            $columnValuesHeader.attr('colspan', item.values.length)
+        }
+        $tr = $('<tr>');
+        $tr.append($('<td>').html(item.name))
+        _.each(item.values, function(value) {
+            $tr.append($('<td>', {'class': value > 0 ? 'success' : 'danger'}).html(value.toFixed(2)));
+        });
+        $tableBody.append($tr);
+    });
+});
+</script>
+</body>
+</html>
