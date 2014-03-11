@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+    <title>OpenFisca Visualizations</title>
+
+    <link href="/bower_components/nvd3/nv.d3.css" rel="stylesheet" type="text/css">
+    <style>
+#chart {
+  height: 500px;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg id="chart"></svg>
+    </div>
+    </div>
+    <script data-main="/benefits/main" src="/bower_components/requirejs/require.js"></script>
+    <script>
+require.config({
+    paths: {
+        d3: '/bower_components/d3/d3',
+        domReady: '/bower_components/requirejs-domready/domReady',
+        jquery: '/bower_components/jquery/dist/jquery',
+        nvd3: '/bower_components/nvd3/nv.d3',
+        queryString: '/js/queryString',
+        underscore: '/bower_components/underscore/underscore'
+    },
+    shim: {
+        d3: {exports: 'd3'},
+        jquery: {exports: '$'},
+        nvd3: {exports: 'nv', deps: ['d3']},
+        underscore: {exports: '_'}
+    }
+});
+    </script>
+</body>
+</html>
