@@ -6,6 +6,7 @@ require([
 
   'queryString'
 ], function(domReady, $, nv, _, queryString) {
+  'use strict';
 
   var axes = [{
       count: 20,
@@ -13,7 +14,6 @@ require([
       min: 2000,
       name: "sali"
       }];
-  var simulationData;
   $.ajax({
       type: "POST",
       url: queryString.simulationUrl,
@@ -23,44 +23,45 @@ require([
   })
   .then(function(data) {
       var xAxis;
-      var value_index = 0;
-      var create_nodes = function(node, nodes, base_value = 0) {
-          if (typeof nodes === 'undefined' || nodes === null) {
+      var valueIndex = 0;
+      var createNodes = function(node, nodes, baseValue) {
+          if (_.isUndefined(nodes)) {
               nodes = [];
+          }
+          if (_.isUndefined(baseValue)) {
+              baseValue = 0;
           }
           if (node.code === 'sal') {
               xAxis = node.values;
           }
           var children = node.children;
           if (children) {
-              var child_base_value = base_value;
+              var childBaseValue = baseValue;
               _.each(node.children, function (child) {
-                  nodes.concat(create_nodes(child, nodes, child_base_value));
-                  child_base_value += child.values[value_index]
+                  nodes.concat(createNodes(child, nodes, childBaseValue));
+                  childBaseValue += child.values[valueIndex];
               });
           }
 
-          value = node.values[value_index]
-          if ( ! children && _.filter(node.values, function(n) { return n != 0; } ).length > 0) {
+          var value = node.values[valueIndex];
+          if ( ! children && _.filter(node.values, function(n) { return n !== 0; } ).length > 0) {
               var column = {
-                  base_value: base_value,
+                  baseValue: baseValue,
                   code: value.code,
                   };
               _.extend(column, node);
               nodes.push(column);
           }
-          return nodes
+          return nodes;
       };
-      var nodes = create_nodes(data.output.value);
+      var nodes = createNodes(data.output.value);
 
-      var data = [];
-      _.each(nodes, function(node) {
-          data.push({
+      return _.map(nodes, function(node) {
+          return {
               key: node.name,
               values: _.zip(xAxis, node.values || [])
-          });
+          };
       });
-      return data;
   })
   .fail(function(jqXHR, textStatus, errorThrown) {
       console.error('Fetch API data error : ', jqXHR, textStatus, errorThrown);
@@ -70,7 +71,6 @@ require([
       //observe that Consumer Discretionary and Consumer Staples have
       //been flipped in the second chart
       var colors = d3.scale.category20();
-      keyColor = function(d, i) {return colors(d.key)};
 
       nv.debug = false;
 
@@ -79,9 +79,9 @@ require([
         chart = nv.models.stackedAreaChart()
                      // .width(600).height(500)
                       .useInteractiveGuideline(true)
-                      .x(function(d) { return d[0] })
-                      .y(function(d) { return d[1] })
-                      .color(keyColor)
+                      .x(function(d) { return d[0]; })
+                      .y(function(d) { return d[1]; })
+                      .color(function (d) { return colors(d.key); })
                       .transitionDuration(300);
                       //.clipEdge(true);
 
@@ -102,9 +102,9 @@ require([
                     // while(this.__transition__)
                     if(this.__transition__)
                       this.__transition__.duration = 1;
-                  })
-                }, 0)
-            })
+                  });
+                }, 0);
+            });
         nv.utils.windowResize(chart.update);
 
         return chart;
