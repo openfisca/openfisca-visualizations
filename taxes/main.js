@@ -9,7 +9,7 @@ require([
 
   $.ajax({
       type: "GET",
-      url: queryString.simulationUrl,
+      url: queryString.simulation_url,
   })
   .then(function(data) {
       var salbrut;
