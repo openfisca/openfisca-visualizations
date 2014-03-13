@@ -13,6 +13,7 @@
     "requirejs-domready": "~2.0.1",
     "underscore": "~1.6.0",
     "d3": "~3.3.13",
-    "nvd3": "~1.1.15-beta"
+    "nvd3": "~1.1.15-beta",
+    "require-handlebars-plugin": "~0.8.0"
   }
 }

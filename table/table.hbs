@@ -1,0 +1,18 @@
+<table class="table" id="openfisca-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th colspan="{{valuesColspan}}">Values</th>
+        </tr>
+    </thead>
+    <tbody>
+{{#data}}
+        <tr>
+            <td>{{name}}</td>
+    {{#values}}
+            <td class="{{tdClass}}">{{value}} €</td>
+    {{/values}}
+        </tr>
+{{/data}}
+    </tbody>
+</table>

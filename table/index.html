@@ -15,33 +15,8 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <table class="table" id="openfisca-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Values</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    </div>
+    <div class="container"></div>
     <script data-main="/table/main" src="/bower_components/requirejs/require.js"></script>
-    <script>
-require.config({
-    paths: {
-        domReady: '/bower_components/requirejs-domready/domReady',
-        jquery: '/bower_components/jquery/dist/jquery',
-        queryString: '/js/queryString',
-        underscore: '/bower_components/underscore/underscore'
-    },
-    shim: {
-        jquery: {exports: '$'},
-        underscore: {exports: '_'}
-    }
-});
-    </script>
+    <script src="/js/require.config.js"></script>
 </body>
 </html>

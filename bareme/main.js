@@ -13,10 +13,10 @@ require([
       max: 40000,
       min: 2000,
       name: "sali"
-      }];
+  }];
   $.ajax({
       type: "POST",
-      url: queryString.simulation_url,
+      url: queryString.simulate_url,
       data: {
           axes: JSON.stringify(axes)
       }

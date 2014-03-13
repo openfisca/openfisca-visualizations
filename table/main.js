@@ -3,12 +3,16 @@ require([
   'jquery',
   'underscore',
 
-  'queryString'
-], function(domReady, $, _, queryString) {
+  'queryString',
+  'hbs!table'
+], function(domReady, $, _, queryString, tableTemplate) {
 
+  var $container = $('.container');
+
+  if (queryString.simulate_url) {
     $.ajax({
       type: "GET",
-      url: queryString.simulation_url,
+      url: queryString.simulate_url,
     })
     .then(function(data) {
       var xAxis;
@@ -51,19 +55,30 @@ require([
       console.error('Fetch API data error : ', jqXHR, textStatus, errorThrown);
     })
     .then(function(data) {
-      var $columnValuesHeader = $('#openfisca-table').find('th').last();
-      var $tableBody = $('#openfisca-table').find('tbody');
-      _.each(data, function(item) {
-        if ($columnValuesHeader.attr('colspan') > item.values.length) {
-          $columnValuesHeader.attr('colspan', item.values.length);
-        }
-        var $tr = $('<tr>');
-        $tr.append($('<td>').html(item.name));
-        _.each(item.values, function(value) {
-          $tr.append($('<td>', {'class': value > 0 ? 'success' : 'danger'}).html(value.toFixed(2)));
-        });
-      $tableBody.append($tr);
-      });
+      var context = {
+        data: _.map(data, function (item) {
+          return {
+            name: item.name,
+            values: _.map(item.values, function (value) {
+              return {
+                tdClass: function(value) {
+                  if (value === 0) {
+                    return '';
+                  } else {
+                    return value > 0 ? 'success' : 'danger';
+                  }
+                }(value),
+                value: value.toFixed(2)
+              };
+            })
+          };
+        }),
+        valuesColspan: _.max(_.map(data, function (item) { return item.values.length; })),
+      };
+      $container.html(tableTemplate(context));
     });
+  } else {
+    $container.html('"simulate_url" GET parameter is missing.');
+  }
 
-  });
+});
