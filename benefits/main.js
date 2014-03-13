@@ -46,13 +46,15 @@ require([
       };
       var nodes = createNodes(data.output.value);
 
-      return _.map(nodes, function(node) {
-          if (node.values[0] > 0) {
+      return _.filter(_.map(nodes, function(node) {
+          if (node.values[0] < 0) {
             return {
                 label: node.name,
                 value: node.values[0]
             };
           }
+      }), function(item) {
+        return (!_.isUndefined(item));
       });
   })
   .fail(function(jqXHR, textStatus, errorThrown) {
