@@ -16,7 +16,7 @@ require([
   }];
   $.ajax({
       type: "POST",
-      url: queryString.simulate_url,
+      url: queryString.simulateUrl,
       data: {
           axes: JSON.stringify(axes)
       }
