@@ -7,105 +7,107 @@ require([
   'queryString'
 ], function(domReady, $, nv, _, queryString) {
   'use strict';
-
   var axes = [{
-      count: 20,
-      max: 40000,
-      min: 0,
-      name: "sali"
-  }];
+    count: 50,
+    max: 80000,
+    min: 0,
+    name: "sali"
+      }];
   $.ajax({
-      type: "POST",
-      url: queryString.simulateUrl,
-      data: {
-          axes: JSON.stringify(axes)
-      }
+    type: "POST",
+    url: queryString.simulateUrl,
+    data: {
+      decomposition: JSON.stringify([
+                       {code: 'nivvie'},
+                       {code: 'sali'},
+                       {code: 'revdisp'}
+                       ]),
+      axes: JSON.stringify(axes),
+    }
   })
-  .then(function(data) {
-      var xAxis;
-      var valueIndex = 0;
-      var createNodes = function(node, nodes, baseValue) {
-          if (_.isUndefined(nodes)) {
-              nodes = [];
-          }
-          if (_.isUndefined(baseValue)) {
-              baseValue = 0;
-          }
-          if (node.code === 'sal') {
-              xAxis = node.values;
-          }
-          var children = node.children;
-          if (children) {
-              var childBaseValue = baseValue;
-              _.each(node.children, function (child) {
-                  nodes.concat(createNodes(child, nodes, childBaseValue));
-                  childBaseValue += child.values[valueIndex];
-              });
-          }
-
-          var value = node.values[valueIndex];
-          if ( ! children && _.filter(node.values, function(n) { return n !== 0; } ).length > 0) {
-              var column = {
-                  baseValue: baseValue,
-                  code: value.code,
-                  };
-              _.extend(column, node);
-              nodes.push(column);
-          }
-          return nodes;
-      };
-      var nodes = createNodes(data.output.value);
-
-      var rd;
-      _.each(nodes, function(node) {
-          if (_.isUndefined(rd)) {
-            rd = _.map(node.values, function(value, idx) {
-              return {
-                x: xAxis[idx],
-                y: value
-              };
-            });
-          } else {
-            _.each(node.values, function(value, idx) {
-              rd[idx] = {
-                x: xAxis[idx],
-                y: rd[idx].y + value
-              };
-            });
-          }
-      });
-      return [{
-        values: rd,
-        key: "Revenue disponible",
-        color: '#ff7f0e'
-        }];
-  })
-  .fail(function(jqXHR, textStatus, errorThrown) {
-      console.error('Fetch API data error : ', jqXHR, textStatus, errorThrown);
-  })
-  .then(function(data) {
-    nv.addGraph(function() {
-      var chart = nv.models.lineChart()
-      .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
-      .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-      .transitionDuration(350)  //how fast do you want the lines to transition?
-      .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
-      .showYAxis(true)        //Show the y-axis
-      .showXAxis(true)        //Show the x-axis
-      ;
-
-    chart.xAxis     //Chart x-axis settings
-      .axisLabel('Salaire imposable')
-      .tickFormat(d3.format(',r'));
-
-    chart.yAxis     //Chart y-axis settings
-      .axisLabel('Revenue disponible')
-      .tickFormat(d3.format('.02f'));
-
+  .then(function (data) {
     console.log(data);
-    d3.select('#chart')    //Select the <svg> element you want to render the chart in.   
-      .datum(data)         //Populate the <svg> element with chart data...
-      .call(chart);          //Finally, render the chart!
+    var data = data.output;
+
+    var parsedData = [];
+
+    var nivvieObj = data.value[0];
+    var revdispObj = data.value[2];
+    var saliObj = data.value[1];
+
+    var revdispMinValue = d3.min(revdispObj.values);
+    // console.log();
+
+    /* Add sal datas */
+    //
+    // _.each(nivvieObj.values, function (val) {
+
+    // });
+    parsedData.push({
+      key: 'Revenu disponible',
+      values: [],
+      bar: true,
+      color: "#ccf",
+    });
+    _.each(revdispObj.values, function (val, i) {
+      // debugger;
+      parsedData[0].values.push([saliObj.values[i]]);
+      parsedData[0].values[i].push(val);
+    });
+
+    parsedData.push({
+      key: 'Niveau de vie',
+      values: [],
+      color: "#ccf",
+    });
+    _.each(nivvieObj.values, function (val, i) {
+      parsedData[1].values.push([saliObj.values[i]]);
+      parsedData[1].values[i].push(val);
+    });
+
+
+    nv.addGraph(function() {
+      var chart = nv.models.linePlusBarChart()
+      .margin({top: 30, right: 80, bottom: 50, left: 70})
+      //We can set x data accessor to use index. Reason? So the bars all appear evenly spaced.
+      .x(function(d,i) { return i })
+      .y(function(d,i) {return d[1] });
+
+    chart.xAxis.tickFormat(function(d) {
+      // console.log(d);
+
+      d = d / 49 * 80000;
+      return d3.format('f')(d)+ '€';
+    });
+
+    chart.y1Axis
+      .tickFormat(d3.format(',f'));
+
+    chart.y2Axis
+      .tickFormat(function(d) { return d3.format(',f')(d)+ '€' });
+
+    chart.bars.forceY([0]);
+
+    d3.select('#chart')
+      .datum(parsedData)
+      .transition()
+      .duration(0)
+      .call(chart);
+
+    var actualYScale = chart.y2Axis.scale(),
+        actualYScaleDomain = actualYScale.domain();
+
+    actualYScale.domain([revdispMinValue, actualYScaleDomain[1]]);
+    chart.y2Axis.scale(actualYScale);
+
+    nv.utils.windowResize(chart.update);
+
+    $('.nv-bars').attr('display', 'none');
+
+    return chart;
     });
   });
 });
+
+
+
