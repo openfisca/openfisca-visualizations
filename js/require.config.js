@@ -1,4 +1,5 @@
 require.config({
+  urlArgs: 'bust=' + Math.random(),
   paths: {
     d3: '/bower_components/d3/d3',
     domReady: '/bower_components/requirejs-domready/domReady',
