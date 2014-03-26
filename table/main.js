@@ -47,7 +47,7 @@ require([
         }
         return nodes;
       };
-      var nodes = createNodes(data.output.value);
+      var nodes = createNodes(data.value);
 
       return nodes;
     })

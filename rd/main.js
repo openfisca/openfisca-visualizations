@@ -27,7 +27,7 @@ require([
   })
   .then(function (data) {
     console.log(data);
-    var data = data.output;
+    var data = data;
 
     var parsedData = [];
 

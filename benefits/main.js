@@ -44,7 +44,7 @@ require([
           }
           return nodes;
       };
-      var nodes = createNodes(data.output.value);
+      var nodes = createNodes(data.value);
 
       return _.filter(_.map(nodes, function(node) {
           if (node.values[0] < 0) {
