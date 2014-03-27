@@ -1,5 +1,6 @@
 {
   "browser": true,
+  "camelcase": true,
   "globals": {
     "alert": false,
     "console": false,

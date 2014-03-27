@@ -6,23 +6,24 @@ require([
   'queryString',
   'hbs!table'
 ], function(domReady, $, _, queryString, tableTemplate) {
+  'use strict';
 
   var $container = $('.container');
 
-  if (queryString.simulate_url) {
+  if (queryString.simulate_url) { // jshint ignore:line
     $.ajax({
-      type: "GET",
-      url: queryString.simulate_url,
+      type: 'GET',
+      url: queryString.simulate_url, // jshint ignore:line
     })
     .then(function(data) {
       var xAxis;
-      var value_index = 0;
+      var valueIndex = 0;
       var createNodes = function(node, nodes, baseValue) {
         if (_.isUndefined(nodes)) {
-            nodes = [];
+          nodes = [];
         }
         if (_.isUndefined(baseValue)) {
-            baseValue = 0;
+          baseValue = 0;
         }
         if (node.code === 'sal') {
           xAxis = node.values;
@@ -32,11 +33,11 @@ require([
           var childBaseValue = baseValue;
           _.each(node.children, function (child) {
             nodes.concat(createNodes(child, nodes, childBaseValue));
-            childBaseValue += child.values[value_index];
+            childBaseValue += child.values[valueIndex];
           });
         }
 
-        var value = node.values[value_index];
+        var value = node.values[valueIndex];
         if ( ! children && _.filter(node.values, function(n) { return n !== 0; } ).length > 0) {
           var column = {
             baseValue: baseValue,

@@ -1,34 +1,33 @@
 require([
   'domReady',
   'jquery',
-  'nvd3',
   'underscore',
+  'd3',
+  'nvd3',
 
   'queryString'
-], function(domReady, $, nv, _, queryString) {
+], function(domReady, $, _, d3, nv, queryString) {
   'use strict';
+
   var axes = [{
     count: 50,
     max: 80000,
     min: 0,
-    name: "sali"
-      }];
+    name: 'sali'
+  }];
   $.ajax({
-    type: "POST",
+    type: 'POST',
     url: queryString.simulateUrl,
     data: {
-      decomposition: JSON.stringify([
-                       {code: 'nivvie'},
-                       {code: 'sali'},
-                       {code: 'revdisp'}
-                       ]),
       axes: JSON.stringify(axes),
+      decomposition: JSON.stringify([
+        {code: 'nivvie'},
+        {code: 'sali'},
+        {code: 'revdisp'},
+      ]),
     }
   })
   .then(function (data) {
-    console.log(data);
-    var data = data;
-
     var parsedData = [];
 
     var nivvieObj = data.value[0];
@@ -47,10 +46,9 @@ require([
       key: 'Revenu disponible',
       values: [],
       bar: true,
-      color: "#ccf",
+      color: '#ccf',
     });
     _.each(revdispObj.values, function (val, i) {
-      // debugger;
       parsedData[0].values.push([saliObj.values[i]]);
       parsedData[0].values[i].push(val);
     });
@@ -58,7 +56,7 @@ require([
     parsedData.push({
       key: 'Niveau de vie',
       values: [],
-      color: "#ccf",
+      color: '#ccf',
     });
     _.each(nivvieObj.values, function (val, i) {
       parsedData[1].values.push([saliObj.values[i]]);
@@ -68,43 +66,39 @@ require([
 
     nv.addGraph(function() {
       var chart = nv.models.linePlusBarChart()
-      .margin({top: 30, right: 80, bottom: 50, left: 70})
-      //We can set x data accessor to use index. Reason? So the bars all appear evenly spaced.
-      .x(function(d,i) { return i })
-      .y(function(d,i) {return d[1] });
+        .margin({top: 30, right: 80, bottom: 50, left: 70})
+        //We can set x data accessor to use index. Reason? So the bars all appear evenly spaced.
+        .x(function(d, i) { return i; })
+        .y(function(d) {return d[1]; });
 
-    chart.xAxis.tickFormat(function(d) {
-      // console.log(d);
+      chart.xAxis.tickFormat(function(d) {
+        d = d / 49 * 80000;
+        return d3.format('f')(d)+ '€';
+      });
 
-      d = d / 49 * 80000;
-      return d3.format('f')(d)+ '€';
-    });
+      chart.y1Axis.tickFormat(d3.format(',f'));
 
-    chart.y1Axis
-      .tickFormat(d3.format(',f'));
+      chart.y2Axis.tickFormat(function(d) { return d3.format(',f')(d) + '€'; });
 
-    chart.y2Axis
-      .tickFormat(function(d) { return d3.format(',f')(d)+ '€' });
+      chart.bars.forceY([0]);
 
-    chart.bars.forceY([0]);
+      d3.select('#chart')
+        .datum(parsedData)
+        .transition()
+        .duration(0)
+        .call(chart);
 
-    d3.select('#chart')
-      .datum(parsedData)
-      .transition()
-      .duration(0)
-      .call(chart);
+      var actualYScale = chart.y2Axis.scale(),
+          actualYScaleDomain = actualYScale.domain();
 
-    var actualYScale = chart.y2Axis.scale(),
-        actualYScaleDomain = actualYScale.domain();
+      actualYScale.domain([revdispMinValue, actualYScaleDomain[1]]);
+      chart.y2Axis.scale(actualYScale);
 
-    actualYScale.domain([revdispMinValue, actualYScaleDomain[1]]);
-    chart.y2Axis.scale(actualYScale);
+      nv.utils.windowResize(chart.update);
 
-    nv.utils.windowResize(chart.update);
+      $('.nv-bars').attr('display', 'none');
 
-    $('.nv-bars').attr('display', 'none');
-
-    return chart;
+      return chart;
     });
   });
 });
