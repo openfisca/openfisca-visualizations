@@ -62,7 +62,6 @@ require([
     console.error('Fetch API data error : ', jqXHR, textStatus, errorThrown);
   })
   .then(function(data) {
-    console.log(data);
     //Donut chart example
     nv.addGraph(function() {
       var chart = nv.models.pieChart()
