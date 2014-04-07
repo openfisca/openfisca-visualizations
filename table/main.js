@@ -74,7 +74,6 @@ require([
             })
           };
         }),
-        valuesColspan: _.max(_.map(data, function (item) { return item.values.length; })),
       };
       $container.html(tableTemplate(context));
     });
