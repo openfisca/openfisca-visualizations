@@ -78,7 +78,7 @@ require([
         .donut(true)
         .donutRatio(0.35);
 
-        container.append('svg')
+        container.text('').append('svg')
           .attr('id', 'chart')
           .datum(data)
           .transition().duration(350)

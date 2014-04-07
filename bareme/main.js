@@ -93,7 +93,7 @@ require([
         chart.xAxis.tickFormat(d3.format(',.2f'));
         chart.yAxis.tickFormat(d3.format(',.2f'));
 
-        container.append('svg')
+        container.text('').append('svg')
           .attr('id', 'chart')
           .datum(data)
           .transition().duration(100)

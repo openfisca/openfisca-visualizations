@@ -88,7 +88,7 @@ require([
 
         chart.bars.forceY([0]);
 
-        container.append('svg')
+        container.text('').append('svg')
           .attr('id', 'chart')
           .datum(parsedData)
           .transition()
