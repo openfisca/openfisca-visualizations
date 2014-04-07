@@ -98,14 +98,7 @@ require([
           .datum(data)
           .transition().duration(100)
           .call(chart);
-  //        .each('start', function() {
-  //            setTimeout(function() {
-  //                d3.selectAll('#chart *').each(function() {
-  //                  if(this.__transition__)
-  //                    this.__transition__.duration = 1;
-  //                });
-  //              }, 0);
-  //          });
+
         nv.utils.windowResize(chart.update);
 
         return chart;

@@ -41,13 +41,7 @@ require([
       var saliObj = data.value[1];
 
       var revdispMinValue = d3.min(revdispObj.values);
-      // console.log();
 
-      /* Add sal datas */
-      //
-      // _.each(nivvieObj.values, function (val) {
-
-      // });
       parsedData.push({
         key: 'Revenu disponible',
         values: [],
@@ -81,11 +75,12 @@ require([
           d = d / 49 * 80000;
           return d3.format('f')(d)+ '€';
         });
-
         chart.y1Axis.tickFormat(d3.format(',f'));
-
         chart.y2Axis.tickFormat(function(d) { return d3.format(',f')(d) + '€'; });
-
+        var actualYScale = chart.y2Axis.scale(),
+            actualYScaleDomain = actualYScale.domain();
+        actualYScale.domain([revdispMinValue, actualYScaleDomain[1]]);
+        chart.y2Axis.scale(actualYScale);
         chart.bars.forceY([0]);
 
         container.text('').append('svg')
@@ -94,12 +89,6 @@ require([
           .transition()
           .duration(0)
           .call(chart);
-
-        var actualYScale = chart.y2Axis.scale(),
-            actualYScaleDomain = actualYScale.domain();
-
-        actualYScale.domain([revdispMinValue, actualYScaleDomain[1]]);
-        chart.y2Axis.scale(actualYScale);
 
         nv.utils.windowResize(chart.update);
 

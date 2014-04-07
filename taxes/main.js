@@ -72,12 +72,11 @@ require([
         var chart = nv.models.pieChart()
           .x(function(d) { return d.label; })
           .y(function(d) { return d.value; })
-          .showLabels(true) //Display pie labels
-          .labelThreshold(0.05) //Configure the minimum slice size for labels to show up
-          .labelType('percent') //Configure what type of data to show in the label. Can be "key", "value" or "percent"
-          .donut(true) //Turn on Donut mode. Makes pie chart look tasty!
-          .donutRatio(0.35) //Configure how big you want the donut hole size to be.
-          ;
+          .showLabels(true)
+          .labelThreshold(0.05)
+          .labelType('percent')
+          .donut(true)
+          .donutRatio(0.35);
 
         container.text('').append('svg')
           .attr('id', 'chart')
@@ -86,6 +85,7 @@ require([
           .call(chart);
 
         nv.utils.windowResize(chart.update);
+
         return chart;
       });
     });
