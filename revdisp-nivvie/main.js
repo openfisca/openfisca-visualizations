@@ -31,6 +31,11 @@ require([
     .then(function(testCase) {
       var data = {
         context: Date.now().toString(),
+        decomposition: [
+          {code: 'nivvie'},
+          {code: 'sali'},
+          {code: 'revdisp'},
+        ],
         scenarios: [
           {
             axes: axes,
