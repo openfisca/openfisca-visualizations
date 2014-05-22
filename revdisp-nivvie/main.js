@@ -20,18 +20,36 @@ require([
     name: 'sali'
   }];
 
-  if (queryString.simulate_url) { // jshint ignore:line
+  if (queryString.test_case_url) { // jshint ignore:line
     $.ajax({
-      type: 'POST',
-      url: queryString.simulate_url, // jshint ignore:line
-      data: {
-        axes: JSON.stringify(axes),
-        decomposition: JSON.stringify([
-          {code: 'nivvie'},
-          {code: 'sali'},
-          {code: 'revdisp'},
-        ]),
-      }
+      type: 'GET',
+      url: queryString.test_case_url, // jshint ignore:line
+      xhrFields: {
+        withCredentials: true,
+      },
+    })
+    .then(function(testCase) {
+      var data = {
+        context: Date.now().toString(),
+        scenarios: [
+          {
+            axes: axes,
+            legislation_url: queryString.legislation_url, // jshint ignore:line
+            test_case: testCase, // jshint ignore:line
+            year: parseInt(queryString.year),
+          },
+        ],
+      };
+      return $.ajax({
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        dataType: 'json',
+        type: 'POST',
+        url: 'http://api.openfisca.fr/api/1/simulate',
+        xhrFields: {
+          withCredentials: true,
+        },
+      });
     })
     .then(function (data) {
       var parsedData = [];
@@ -98,7 +116,7 @@ require([
       });
     });
   } else {
-    container.text('"simulate_url" GET parameter is missing.');
+    container.text('"test_case_url" GET parameter is missing.');
   }
 
 });

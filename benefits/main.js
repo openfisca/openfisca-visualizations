@@ -13,10 +13,35 @@ require([
 
   var container = d3.select('.container');
 
-  if (queryString.simulate_url) { // jshint ignore:line
+  if (queryString.test_case_url) { // jshint ignore:line
     $.ajax({
       type: 'GET',
-      url: queryString.simulate_url, // jshint ignore:line
+      url: queryString.test_case_url, // jshint ignore:line
+      xhrFields: {
+        withCredentials: true,
+      },
+    })
+    .then(function(testCase) {
+      var data = {
+        context: Date.now().toString(),
+        scenarios: [
+          {
+            legislation_url: queryString.legislation_url, // jshint ignore:line
+            test_case: testCase, // jshint ignore:line
+            year: parseInt(queryString.year),
+          },
+        ],
+      };
+      return $.ajax({
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        dataType: 'json',
+        type: 'POST',
+        url: 'http://api.openfisca.fr/api/1/simulate',
+        xhrFields: {
+          withCredentials: true,
+        },
+      });
     })
     .then(function(data) {
       var salbrut;
@@ -90,7 +115,7 @@ require([
       });
     });
   } else {
-    container.text('"simulate_url" GET parameter is missing.');
+    container.text('"test_case_url" GET parameter is missing.');
   }
 
 });
